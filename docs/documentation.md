@@ -558,3 +558,63 @@ It must derive financial truth from Stellar and the contract, not invent its own
 
 ---
 
+# 21. Repository Structure
+
+The organization should eventually contain:
+
+```text
+splitpay-web
+splitpay-contract
+splitpay-mobile
+splitpay-sdk
+splitpay-api
+splitpay-docs
+```
+
+Initial development focuses on:
+
+```text
+splitpay-contract
+splitpay-web
+splitpay-mobile
+```
+
+---
+
+# 22. Development Networks
+
+Development should begin on Stellar Testnet.
+
+No production/mainnet assumptions should be hard-coded.
+
+Configuration must allow network-specific:
+
+* RPC endpoint
+* network passphrase
+* contract address
+* asset addresses
+* deployment account
+* explorer URLs
+
+---
+
+# 23. Contract Development Stack
+
+The contract uses:
+
+```text
+Rust
+Soroban SDK
+Stellar CLI
+Cargo
+WASM
+Stellar Testnet
+```
+
+Testing should use Soroban's local test environment before Testnet integration.
+
+---
+
+# 24. Testing Strategy
+
+Contract testing must include:
