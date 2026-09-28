@@ -168,3 +168,63 @@ get_pool(...)
 get_member(...)
 get_pool_members(...)
 create_payment(...)
+settle_payment(...)
+get_payment(...)
+get_distribution(...)
+```
+
+The exact Rust signatures should follow Soroban SDK conventions.
+
+Do not expose unnecessary functions.
+
+---
+
+# 9. Authorization
+
+Authorization must be explicit.
+
+Pool mutations:
+
+```text
+pool.owner.require_auth()
+```
+
+Payment funding:
+
+```text
+payer.require_auth()
+```
+
+Administrative operations:
+
+```text
+admin.require_auth()
+```
+
+Never trust caller-supplied identity arguments without checking authorization.
+
+---
+
+# 10. Errors
+
+Create a typed contract error enum.
+
+Expected errors include:
+
+```text
+AlreadyInitialized
+NotInitialized
+PoolNotFound
+PaymentNotFound
+MemberNotFound
+MemberAlreadyExists
+Unauthorized
+InvalidPoolStatus
+InvalidShare
+InvalidTotalShares
+InvalidAmount
+InvalidAsset
+PaymentAlreadyExists
+PaymentAlreadySettled
+InvalidPayment
+```
