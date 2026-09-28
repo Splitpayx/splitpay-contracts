@@ -58,3 +58,53 @@ share_bps
 ```
 
 ### Payment
+
+```text
+id
+pool_id
+payer
+asset
+amount
+status
+created_at
+```
+
+### Distribution
+
+```text
+payment_id
+recipient
+amount
+share_bps
+```
+
+---
+
+# 4. Pool Rules
+
+A pool:
+
+* has exactly one owner
+* has one configured asset
+* can have multiple members
+* requires total shares to equal 10000 basis points
+* cannot accept payments while invalid
+* cannot be mutated by unauthorized users
+
+Example:
+
+```text
+Alice    6000
+Bob      3000
+Charlie  1000
+
+Total = 10000
+```
+
+---
+
+# 5. Payment Rules
+
+A payment must:
+
+* reference an existing pool
