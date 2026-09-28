@@ -668,3 +668,40 @@ The first version should NOT attempt to build:
 The protocol should stay focused on collaborative payment splitting.
 
 ---
+
+# 26. Future Features
+
+Potential future additions:
+
+* recurring payments
+* milestone payments
+* payment links
+* invoices
+* dispute workflows
+* escrow-style release
+* multi-asset pools
+* scheduled distributions
+* team permissions
+* DAO/team treasury functionality
+* fiat on/off-ramp integrations
+* Stellar anchor integrations
+* mobile wallet features
+* advanced analytics
+
+These are not part of the initial contract scope.
+
+---
+
+# 27. Guiding Principle
+
+SplitPay should not put everything on-chain.
+
+It should put the **financial rules that must be trusted** on-chain and keep everything else where it is cheaper, faster and easier to maintain.
+
+The contract is the financial source of truth.
+
+The web and mobile applications are clients.
+
+The backend is an optional service layer.
+
+The SDK is the shared interface between applications and the protocol.
