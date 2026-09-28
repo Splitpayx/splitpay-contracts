@@ -488,3 +488,73 @@ These invariants must always hold.
 ```text
 sum(all member shares) == 10000
 ```
+
+### Payment invariant
+
+```text
+payment amount > 0
+```
+
+### Distribution invariant
+
+```text
+sum(all distributions) == payment amount
+```
+
+### Settlement invariant
+
+```text
+payment cannot be settled twice
+```
+
+### Authorization invariant
+
+```text
+only authorized actors can mutate protected state
+```
+
+### Snapshot invariant
+
+```text
+historical payment distributions never change
+```
+
+---
+
+# 19. Off-Chain Data
+
+The following should generally remain off-chain:
+
+* user profiles
+* display names
+* avatars
+* descriptions
+* project documents
+* email notifications
+* application preferences
+* analytics
+* search indexes
+* rich metadata
+
+The blockchain should not become the application's general-purpose database.
+
+---
+
+# 20. API / Indexing Layer
+
+An optional backend can provide:
+
+```text
+Transaction indexing
+Notification delivery
+Metadata storage
+Search
+Analytics
+Webhook processing
+Application-specific APIs
+```
+
+It must derive financial truth from Stellar and the contract, not invent its own balances.
+
+---
+
