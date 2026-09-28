@@ -208,3 +208,73 @@ It is a payment splitting and distribution contract.
 
 # 8. Initial Contract Interface
 
+The initial contract should expose functionality conceptually equivalent to:
+
+```text
+initialize(admin)
+
+create_pool(pool_id, owner, asset)
+
+add_member(pool_id, member, share)
+
+remove_member(pool_id, member)
+
+update_member_share(pool_id, member, share)
+
+set_pool_status(pool_id, status)
+
+get_pool(pool_id)
+
+get_member(pool_id, member)
+
+get_pool_members(pool_id)
+
+create_payment(payment_id, pool_id, payer, amount)
+
+settle_payment(payment_id)
+
+get_payment(payment_id)
+
+get_distribution(payment_id, member)
+```
+
+The exact interface may change during implementation if Soroban conventions or security considerations require it.
+
+---
+
+# 9. Pool Lifecycle
+
+```text
+CREATE
+  ↓
+CONFIGURE
+  ↓
+ACTIVE
+  ↓
+PAYMENT
+  ↓
+SETTLED
+  ↓
+COMPLETED
+```
+
+A pool should not accept payments until its configuration is valid.
+
+A pool's split percentages must always equal:
+
+```text
+10000 basis points
+```
+
+Therefore:
+
+```text
+50% = 5000
+25% = 2500
+25% = 2500
+
+Total = 10000
+```
+
+Basis points should be preferred over floating point percentages.
+
