@@ -138,3 +138,73 @@ The Soroban contract is the source of truth for:
 * payment split snapshots
 * authorization
 * on-chain events
+* relevant financial state
+
+The contract must not depend on the web application to enforce financial rules.
+
+The web application is a client of the contract.
+
+---
+
+# 5. Web Responsibility
+
+`splitpay-web` is responsible for:
+
+* authentication/onboarding
+* wallet connection
+* pool discovery
+* pool management UI
+* member management UI
+* split configuration UI
+* payment creation UI
+* transaction status
+* transaction history
+* portfolio/balance presentation
+* notifications
+* application metadata
+
+The web application must never be treated as the authoritative source for financial balances or split calculations.
+
+---
+
+# 6. Mobile Responsibility
+
+`splitpay-mobile` will provide the same core functionality through React Native.
+
+It should consume the same contract interface and eventually use the same SDK as the web application.
+
+Business rules must not be duplicated between web and mobile.
+
+---
+
+# 7. Contract Architecture
+
+The initial contract should be a single SplitPay protocol contract.
+
+It should interact with Stellar assets through the Stellar Asset Contract / SEP-41 token interface.
+
+Conceptually:
+
+```text
+User
+ │
+ │ authorize
+ ▼
+SplitPay Contract
+ │
+ │ token transfer
+ ▼
+Stellar Asset Contract
+ │
+ ▼
+Recipient Accounts
+```
+
+The SplitPay contract is not a token contract.
+
+It is a payment splitting and distribution contract.
+
+---
+
+# 8. Initial Contract Interface
+
