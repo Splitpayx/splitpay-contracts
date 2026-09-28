@@ -418,3 +418,73 @@ share_updated
 pool_status_changed
 payment_created
 payment_settled
+distribution_created
+```
+
+Events should contain enough information for an indexer or frontend to reconstruct activity without relying exclusively on contract storage.
+
+---
+
+# 16. Storage
+
+Use Soroban storage deliberately.
+
+Expected storage categories include:
+
+```text
+Pool
+Member
+Payment
+Distribution
+Configuration
+```
+
+Large collections should not be stored inefficiently in a single growing object.
+
+Storage design must consider:
+
+* ledger footprint
+* TTL
+* archival/restoration
+* read frequency
+* write frequency
+* scalability
+
+State archival and TTL management should be considered before production deployment.
+
+---
+
+# 17. Security Requirements
+
+The contract must:
+
+* validate all input
+* reject zero or negative payment amounts
+* reject invalid shares
+* enforce 100% split configuration
+* enforce authorization
+* prevent unauthorized pool modifications
+* prevent duplicate payment identifiers
+* prevent double settlement
+* validate pool status
+* validate supported assets
+* use checked integer arithmetic
+* prevent rounding loss
+* ensure atomic settlement
+* avoid reentrancy assumptions where cross-contract calls are involved
+* emit deterministic events
+* have comprehensive tests
+
+Financial invariants take priority over convenience.
+
+---
+
+# 18. Important Invariants
+
+These invariants must always hold.
+
+### Split invariant
+
+```text
+sum(all member shares) == 10000
+```
