@@ -348,3 +348,63 @@ The test suite must cover:
 ### Security
 
 * unauthorized owner mutation
+* unauthorized admin operation
+* invalid addresses
+* invalid state transitions
+
+---
+
+# 15. Financial Invariants
+
+Write explicit tests for:
+
+```text
+total shares == 10000
+```
+
+and:
+
+```text
+sum distributions == payment amount
+```
+
+and:
+
+```text
+settled payment cannot settle again
+```
+
+and:
+
+```text
+historical distributions never change
+```
+
+These are protocol invariants, not optional tests.
+
+---
+
+# 16. Repository Structure
+
+The repository should initially look approximately like:
+
+```text
+splitpay-contract/
+├── Cargo.toml
+├── Cargo.lock
+├── README.md
+├── PRD.md
+├── Makefile
+├── .gitignore
+│
+├── contracts/
+│   └── splitpay/
+│       ├── Cargo.toml
+│       └── src/
+│           ├── lib.rs
+│           ├── contract.rs
+│           ├── storage.rs
+│           ├── types.rs
+│           ├── errors.rs
+│           ├── events.rs
+│           └── test.rs
