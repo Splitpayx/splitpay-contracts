@@ -466,3 +466,5 @@ Those belong to other repositories or later phases.
 The contract is not considered complete because it compiles.
 
 It is complete only when the financial behavior is proven through tests and successfully exercised on Stellar Testnet.
+
+The contract must prioritize correctness, authorization, deterministic accounting and simplicity over feature count.
