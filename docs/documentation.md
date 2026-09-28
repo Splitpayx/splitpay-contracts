@@ -68,3 +68,73 @@ A pool contains:
 * members
 * supported asset
 * split configuration
+* status
+* creation timestamp
+* optional metadata reference
+
+A pool does not represent a bank account.
+
+It represents rules for how funds should be distributed.
+
+## Member
+
+A member is an address participating in a pool.
+
+Each member has a percentage share.
+
+Example:
+
+```text
+Alice    50%
+Bob      30%
+Charlie  20%
+```
+
+The total must always equal exactly 100%.
+
+## Payment
+
+A Payment represents funds deposited into a pool for distribution.
+
+A payment contains:
+
+* payment identifier
+* pool identifier
+* payer
+* asset
+* gross amount
+* split snapshot
+* timestamp
+
+The split configuration used for a payment must be immutable after the payment is created.
+
+## Distribution
+
+A Distribution represents the amounts assigned to individual members from a payment.
+
+Example:
+
+```text
+Payment: 100 USDC
+
+Alice    50 USDC
+Bob      30 USDC
+Charlie  20 USDC
+```
+
+---
+
+# 4. Blockchain Responsibility
+
+The Soroban contract is the source of truth for:
+
+* pool creation
+* pool membership
+* split configuration
+* split validation
+* supported asset configuration
+* payment settlement
+* distribution calculations
+* payment split snapshots
+* authorization
+* on-chain events
