@@ -278,3 +278,73 @@ Total = 10000
 
 Basis points should be preferred over floating point percentages.
 
+---
+
+# 10. Payment Lifecycle
+
+```text
+Payment Created
+      ↓
+Validate Pool
+      ↓
+Validate Asset
+      ↓
+Validate Amount
+      ↓
+Validate Pool Configuration
+      ↓
+Snapshot Split
+      ↓
+Transfer Asset
+      ↓
+Calculate Distribution
+      ↓
+Transfer Allocations
+      ↓
+Emit Events
+      ↓
+Payment Settled
+```
+
+Settlement must be atomic.
+
+If any required operation fails, the entire transaction should revert.
+
+---
+
+# 11. Split Calculation
+
+For a payment amount `A` and member share `S`:
+
+```text
+member_amount = A × S / 10000
+```
+
+All calculations must use integer arithmetic.
+
+No floating point arithmetic is allowed in the contract.
+
+The implementation must define how remainder units are handled.
+
+The preferred invariant is:
+
+```text
+sum(member allocations) == payment amount
+```
+
+No funds may disappear because of rounding.
+
+For the first implementation, the contract should reject configurations where deterministic allocation cannot satisfy the exact total, or use a clearly documented remainder policy.
+
+---
+
+# 12. Payment Snapshot
+
+When a payment is settled, the contract must snapshot the active split configuration.
+
+Example:
+
+```text
+Pool:
+
+Alice 60%
