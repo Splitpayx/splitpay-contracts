@@ -618,3 +618,53 @@ Testing should use Soroban's local test environment before Testnet integration.
 # 24. Testing Strategy
 
 Contract testing must include:
+
+### Unit tests
+
+* pool creation
+* member management
+* share validation
+* payment creation
+* distribution calculation
+* authorization
+* duplicate payments
+* invalid states
+
+### Financial invariant tests
+
+* total shares always equal 100%
+* distributions equal payment amount
+* no rounding loss
+* no double settlement
+
+### Integration tests
+
+* contract + Stellar asset
+* payment settlement
+* multiple members
+* multiple payments
+* changed splits between payments
+
+### Failure tests
+
+Every expected failure condition should be explicitly tested.
+
+---
+
+# 25. Non-Goals
+
+The first version should NOT attempt to build:
+
+* a custom SplitPay token
+* a decentralized exchange
+* lending
+* yield generation
+* cross-chain bridges
+* fiat custody
+* a complete banking system
+* arbitrary smart contract execution
+* complex DAO governance
+
+The protocol should stay focused on collaborative payment splitting.
+
+---
