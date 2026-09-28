@@ -288,3 +288,63 @@ sum(allocations) == payment.amount
 Define and test a deterministic remainder policy.
 
 ---
+
+# 13. State Design
+
+Keep storage modular.
+
+Do not store an ever-growing list of every payment inside a single pool object.
+
+Prefer individual storage entries keyed by IDs and addresses where appropriate.
+
+The storage design must remain compatible with Soroban's storage and TTL model.
+
+---
+
+# 14. Tests
+
+The test suite must cover:
+
+### Pool
+
+* initialize
+* create pool
+* duplicate pool
+* invalid owner
+* valid status
+* invalid status
+
+### Members
+
+* add member
+* duplicate member
+* remove member
+* update share
+* unauthorized mutation
+* invalid shares
+* total share validation
+
+### Payments
+
+* valid payment
+* invalid payment
+* duplicate payment
+* wrong asset
+* zero amount
+* nonexistent pool
+
+### Settlement
+
+* one member
+* two members
+* multiple members
+* exact percentages
+* uneven amounts
+* remainder handling
+* changed pool configuration
+* duplicate settlement
+* unauthorized settlement
+
+### Security
+
+* unauthorized owner mutation
