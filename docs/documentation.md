@@ -348,3 +348,73 @@ Example:
 Pool:
 
 Alice 60%
+Bob   40%
+
+Payment #1
+→ Alice 60
+→ Bob 40
+```
+
+If the pool later changes to:
+
+```text
+Alice 70%
+Bob   30%
+```
+
+Payment #1 must remain:
+
+```text
+Alice 60
+Bob   40
+```
+
+Historical payments must never be recalculated using current pool configuration.
+
+---
+
+# 13. Authorization
+
+Contract functions must enforce authorization based on the actor responsible for the operation.
+
+Examples:
+
+* pool owner authorizes pool configuration changes
+* member authorizes actions requiring member authority
+* payer authorizes payment funding
+* administrative functions require contract administrator authorization where applicable
+
+Never trust an address passed as an argument without verifying authorization.
+
+---
+
+# 14. Assets
+
+The contract should support Stellar assets through the Stellar Asset Contract interface.
+
+The first supported assets should be:
+
+* XLM
+* Stellar test assets during development
+* USDC on the target network when appropriate
+
+The contract should not hard-code a specific issuer unless explicitly required.
+
+Asset addresses must be treated as configuration.
+
+---
+
+# 15. Events
+
+Important state changes should emit structured events.
+
+Initial events should include:
+
+```text
+pool_created
+member_added
+member_removed
+share_updated
+pool_status_changed
+payment_created
+payment_settled
