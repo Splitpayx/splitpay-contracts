@@ -228,3 +228,63 @@ PaymentAlreadyExists
 PaymentAlreadySettled
 InvalidPayment
 ```
+
+Use contract errors consistently.
+
+Avoid string-based error handling.
+
+---
+
+# 11. Events
+
+Emit structured events for:
+
+```text
+PoolCreated
+MemberAdded
+MemberRemoved
+ShareUpdated
+PoolStatusChanged
+PaymentCreated
+PaymentSettled
+DistributionCreated
+```
+
+Events must contain enough information for a future indexer to reconstruct activity.
+
+---
+
+# 12. Arithmetic
+
+Use integer arithmetic only.
+
+Represent percentages using basis points:
+
+```text
+10000 = 100%
+```
+
+Never use floating point.
+
+For:
+
+```text
+amount = 1000
+share = 2500
+```
+
+the allocation is:
+
+```text
+250
+```
+
+The implementation must guarantee:
+
+```text
+sum(allocations) == payment.amount
+```
+
+Define and test a deterministic remainder policy.
+
+---
