@@ -408,3 +408,61 @@ splitpay-contract/
 │           ├── errors.rs
 │           ├── events.rs
 │           └── test.rs
+│
+├── scripts/
+│   ├── build.sh
+│   ├── test.sh
+│   └── deploy-testnet.sh
+│
+└── target/
+```
+
+Do not create unnecessary abstractions during the first implementation.
+
+---
+
+# 17. Deliverables
+
+V1 is complete when:
+
+1. Contract builds successfully.
+2. All local tests pass.
+3. Pool creation works.
+4. Members can be configured.
+5. Shares are validated.
+6. Payments can be created.
+7. Payments can be settled.
+8. Funds are distributed correctly.
+9. Historical split snapshots remain immutable.
+10. Events are emitted.
+11. Authorization is enforced.
+12. Contract can be deployed to Stellar Testnet.
+13. Testnet invocation has been successfully demonstrated.
+
+---
+
+# 18. Out of Scope
+
+Do not implement:
+
+* custom token
+* mobile integration
+* web UI
+* authentication system
+* fiat payment processing
+* Paystack
+* bank withdrawals
+* email
+* notifications
+* indexing backend
+* mainnet deployment
+
+Those belong to other repositories or later phases.
+
+---
+
+# 19. Definition of Done
+
+The contract is not considered complete because it compiles.
+
+It is complete only when the financial behavior is proven through tests and successfully exercised on Stellar Testnet.
