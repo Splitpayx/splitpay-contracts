@@ -9,4 +9,6 @@ pub enum Error {
     PoolNotFound = 3,
     PaymentNotFound = 4,
     MemberNotFound = 5,
+    MemberAlreadyExists = 6,
+    Unauthorized = 7,
 }
