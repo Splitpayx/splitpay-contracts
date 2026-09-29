@@ -6,4 +6,7 @@ use soroban_sdk::contracterror;
 pub enum Error {
     AlreadyInitialized = 1,
     NotInitialized = 2,
+    PoolNotFound = 3,
+    PaymentNotFound = 4,
+    MemberNotFound = 5,
 }
