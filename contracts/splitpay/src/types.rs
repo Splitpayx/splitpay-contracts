@@ -15,3 +15,13 @@ pub enum PaymentStatus {
     Pending = 1,
     Settled = 2,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Pool {
+    pub id: u64,
+    pub owner: Address,
+    pub asset: Address,
+    pub status: PoolStatus,
+    pub created_at: u64,
+}
