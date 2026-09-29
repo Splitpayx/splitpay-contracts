@@ -33,3 +33,15 @@ pub struct Member {
     pub address: Address,
     pub share_bps: u32,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Payment {
+    pub id: u64,
+    pub pool_id: u64,
+    pub payer: Address,
+    pub asset: Address,
+    pub amount: i128,
+    pub status: PaymentStatus,
+    pub created_at: u64,
+}
