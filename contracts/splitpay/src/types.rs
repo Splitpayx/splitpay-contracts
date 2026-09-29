@@ -25,3 +25,11 @@ pub struct Pool {
     pub status: PoolStatus,
     pub created_at: u64,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Member {
+    pub pool_id: u64,
+    pub address: Address,
+    pub share_bps: u32,
+}
