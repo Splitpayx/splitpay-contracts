@@ -13,3 +13,20 @@ pub enum DataKey {
     Distribution(u64, Address),
     PaymentRecipients(u64),
 }
+
+// --- Config Storage ---
+
+pub fn has_config(env: &Env) -> bool {
+    env.storage().instance().has(&DataKey::Config)
+}
+
+pub fn set_config(env: &Env, config: &ContractConfig) {
+    env.storage().instance().set(&DataKey::Config, config);
+}
+
+pub fn get_config(env: &Env) -> Result<ContractConfig, Error> {
+    env.storage()
+        .instance()
+        .get(&DataKey::Config)
+        .ok_or(Error::NotInitialized)
+}
