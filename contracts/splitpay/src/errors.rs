@@ -11,4 +11,7 @@ pub enum Error {
     MemberNotFound = 5,
     MemberAlreadyExists = 6,
     Unauthorized = 7,
+    InvalidPoolStatus = 8,
+    InvalidShare = 9,
+    InvalidTotalShares = 10,
 }
