@@ -49,3 +49,18 @@ pub fn get_pool(env: &Env, pool_id: u64) -> Result<Pool, Error> {
         .get(&DataKey::Pool(pool_id))
         .ok_or(Error::PoolNotFound)
 }
+
+// --- Member Storage ---
+
+pub fn get_pool_member_addresses(env: &Env, pool_id: u64) -> Vec<Address> {
+    env.storage()
+        .persistent()
+        .get(&DataKey::PoolMembers(pool_id))
+        .unwrap_or_else(|| Vec::new(env))
+}
+
+pub fn set_pool_member_addresses(env: &Env, pool_id: u64, addresses: &Vec<Address>) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::PoolMembers(pool_id), addresses);
+}
