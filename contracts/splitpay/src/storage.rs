@@ -30,3 +30,22 @@ pub fn get_config(env: &Env) -> Result<ContractConfig, Error> {
         .get(&DataKey::Config)
         .ok_or(Error::NotInitialized)
 }
+
+// --- Pool Storage ---
+
+pub fn has_pool(env: &Env, pool_id: u64) -> bool {
+    env.storage().persistent().has(&DataKey::Pool(pool_id))
+}
+
+pub fn set_pool(env: &Env, pool: &Pool) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::Pool(pool.id), pool);
+}
+
+pub fn get_pool(env: &Env, pool_id: u64) -> Result<Pool, Error> {
+    env.storage()
+        .persistent()
+        .get(&DataKey::Pool(pool_id))
+        .ok_or(Error::PoolNotFound)
+}
