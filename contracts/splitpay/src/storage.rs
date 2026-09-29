@@ -114,3 +114,24 @@ pub fn get_pool_members(env: &Env, pool_id: u64) -> Result<Vec<Member>, Error> {
     }
     Ok(members)
 }
+
+// --- Payment Storage ---
+
+pub fn has_payment(env: &Env, payment_id: u64) -> bool {
+    env.storage()
+        .persistent()
+        .has(&DataKey::Payment(payment_id))
+}
+
+pub fn set_payment(env: &Env, payment: &Payment) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::Payment(payment.id), payment);
+}
+
+pub fn get_payment(env: &Env, payment_id: u64) -> Result<Payment, Error> {
+    env.storage()
+        .persistent()
+        .get(&DataKey::Payment(payment_id))
+        .ok_or(Error::PaymentNotFound)
+}
