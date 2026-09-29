@@ -54,3 +54,9 @@ pub struct Distribution {
     pub amount: i128,
     pub share_bps: u32,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ContractConfig {
+    pub admin: Address,
+}
