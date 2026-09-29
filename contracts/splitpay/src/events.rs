@@ -33,3 +33,30 @@ pub fn pool_status_changed(env: &Env, pool_id: u64, status: PoolStatus) {
     env.events()
         .publish((Symbol::new(env, "pool_status_changed"), pool_id), status);
 }
+
+pub fn payment_created(env: &Env, payment_id: u64, pool_id: u64, payer: &Address, amount: i128) {
+    env.events().publish(
+        (Symbol::new(env, "payment_created"), payment_id),
+        (pool_id, payer.clone(), amount),
+    );
+}
+
+pub fn payment_settled(env: &Env, payment_id: u64, pool_id: u64, payer: &Address, amount: i128) {
+    env.events().publish(
+        (Symbol::new(env, "payment_settled"), payment_id),
+        (pool_id, payer.clone(), amount),
+    );
+}
+
+pub fn distribution_created(
+    env: &Env,
+    payment_id: u64,
+    recipient: &Address,
+    amount: i128,
+    share_bps: u32,
+) {
+    env.events().publish(
+        (Symbol::new(env, "distribution_created"), payment_id),
+        (recipient.clone(), amount, share_bps),
+    );
+}
