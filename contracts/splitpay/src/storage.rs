@@ -135,3 +135,46 @@ pub fn get_payment(env: &Env, payment_id: u64) -> Result<Payment, Error> {
         .get(&DataKey::Payment(payment_id))
         .ok_or(Error::PaymentNotFound)
 }
+
+// --- Distribution Storage ---
+
+pub fn has_distribution(env: &Env, payment_id: u64, recipient: &Address) -> bool {
+    env.storage()
+        .persistent()
+        .has(&DataKey::Distribution(payment_id, recipient.clone()))
+}
+
+pub fn set_distribution(env: &Env, distribution: &Distribution) {
+    env.storage().persistent().set(
+        &DataKey::Distribution(distribution.payment_id, distribution.recipient.clone()),
+        distribution,
+    );
+}
+
+pub fn get_distribution(
+    env: &Env,
+    payment_id: u64,
+    recipient: &Address,
+) -> Result<Distribution, Error> {
+    // Check payment existence first
+    if !has_payment(env, payment_id) {
+        return Err(Error::PaymentNotFound);
+    }
+    env.storage()
+        .persistent()
+        .get(&DataKey::Distribution(payment_id, recipient.clone()))
+        .ok_or(Error::MemberNotFound)
+}
+
+pub fn get_payment_recipients(env: &Env, payment_id: u64) -> Vec<Address> {
+    env.storage()
+        .persistent()
+        .get(&DataKey::PaymentRecipients(payment_id))
+        .unwrap_or_else(|| Vec::new(env))
+}
+
+pub fn set_payment_recipients(env: &Env, payment_id: u64, recipients: &Vec<Address>) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::PaymentRecipients(payment_id), recipients);
+}
