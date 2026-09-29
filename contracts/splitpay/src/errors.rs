@@ -16,4 +16,8 @@ pub enum Error {
     InvalidTotalShares = 10,
     InvalidAmount = 11,
     InvalidAsset = 12,
+    PaymentAlreadyExists = 13,
+    PaymentAlreadySettled = 14,
+    InvalidPayment = 15,
+    PoolAlreadyExists = 16,
 }
