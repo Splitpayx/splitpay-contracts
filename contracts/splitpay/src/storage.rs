@@ -64,3 +64,23 @@ pub fn set_pool_member_addresses(env: &Env, pool_id: u64, addresses: &Vec<Addres
         .persistent()
         .set(&DataKey::PoolMembers(pool_id), addresses);
 }
+
+pub fn has_member(env: &Env, pool_id: u64, address: &Address) -> bool {
+    env.storage()
+        .persistent()
+        .has(&DataKey::Member(pool_id, address.clone()))
+}
+
+pub fn set_member(env: &Env, member: &Member) {
+    env.storage().persistent().set(
+        &DataKey::Member(member.pool_id, member.address.clone()),
+        member,
+    );
+}
+
+pub fn get_member(env: &Env, pool_id: u64, address: &Address) -> Result<Member, Error> {
+    env.storage()
+        .persistent()
+        .get(&DataKey::Member(pool_id, address.clone()))
+        .ok_or(Error::MemberNotFound)
+}
