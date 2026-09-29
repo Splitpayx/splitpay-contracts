@@ -20,4 +20,5 @@ pub enum Error {
     PaymentAlreadySettled = 14,
     InvalidPayment = 15,
     PoolAlreadyExists = 16,
+    ArithmeticOverflow = 17,
 }
