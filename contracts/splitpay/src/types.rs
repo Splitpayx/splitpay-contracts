@@ -45,3 +45,12 @@ pub struct Payment {
     pub status: PaymentStatus,
     pub created_at: u64,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Distribution {
+    pub payment_id: u64,
+    pub recipient: Address,
+    pub amount: i128,
+    pub share_bps: u32,
+}
