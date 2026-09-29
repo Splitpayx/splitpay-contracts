@@ -14,4 +14,6 @@ pub enum Error {
     InvalidPoolStatus = 8,
     InvalidShare = 9,
     InvalidTotalShares = 10,
+    InvalidAmount = 11,
+    InvalidAsset = 12,
 }
