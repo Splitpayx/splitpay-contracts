@@ -62,3 +62,12 @@ fn test_successful_initialization() {
 
     assert_eq!(client.try_initialize(&admin), Ok(Ok(())));
 }
+
+#[test]
+fn test_duplicate_initialization() {
+    let fixture = TestFixture::setup();
+    let another_admin = Address::generate(&fixture.env);
+
+    let res = fixture.client.try_initialize(&another_admin);
+    assert_eq!(res, Err(Ok(Error::AlreadyInitialized)));
+}
