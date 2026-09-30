@@ -274,3 +274,33 @@ fn test_total_shares_above_10000_rejected() {
     let res = fixture.client.try_add_member(&1, &member2, &4001);
     assert_eq!(res, Err(Ok(Error::InvalidTotalShares)));
 }
+
+
+// ==========================================
+// 4. PAYMENT CREATION TESTS
+// ==========================================
+
+#[test]
+fn test_create_valid_payment() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member1, &10000);
+
+    assert_eq!(
+        fixture.client.try_create_payment(&100, &1, &payer, &5000),
+        Ok(Ok(()))
+    );
+
+    let payment = fixture.client.get_payment(&100);
+    assert_eq!(payment.id, 100);
+    assert_eq!(payment.pool_id, 1);
+    assert_eq!(payment.payer, payer);
+    assert_eq!(payment.amount, 5000);
+    assert_eq!(payment.status, PaymentStatus::Pending);
+}
