@@ -238,3 +238,22 @@ fn test_update_member_share() {
     fixture.client.update_member_share(&1, &member1, &5000);
     assert_eq!(fixture.client.get_member(&1, &member1).share_bps, 5000);
 }
+
+#[test]
+fn test_invalid_shares() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+
+    // Share 0
+    let res = fixture.client.try_add_member(&1, &member1, &0);
+    assert_eq!(res, Err(Ok(Error::InvalidShare)));
+
+    // Share > 10000
+    let res2 = fixture.client.try_add_member(&1, &member1, &10001);
+    assert_eq!(res2, Err(Ok(Error::InvalidShare)));
+}
