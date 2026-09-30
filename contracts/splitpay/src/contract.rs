@@ -174,4 +174,33 @@ impl SplitPayContract {
         events::share_updated(&env, pool_id, &address, old_member.share_bps, share_bps);
         Ok(())
     }
+
+    /// Update the operational status of a pool (Active or Inactive).
+    pub fn set_pool_status(env: Env, pool_id: u64, status: PoolStatus) -> Result<(), Error> {
+        if !has_config(&env) {
+            return Err(Error::NotInitialized);
+        }
+        let mut pool = get_pool(&env, pool_id)?;
+        pool.owner.require_auth();
+
+        pool.status = status;
+        set_pool(&env, &pool);
+        events::pool_status_changed(&env, pool_id, status);
+        Ok(())
+    }
+
+    /// Retrieve pool details.
+    pub fn get_pool(env: Env, pool_id: u64) -> Result<Pool, Error> {
+        get_pool(&env, pool_id)
+    }
+
+    /// Retrieve a member's configuration within a pool.
+    pub fn get_member(env: Env, pool_id: u64, address: Address) -> Result<Member, Error> {
+        storage::get_member(&env, pool_id, &address)
+    }
+
+    /// Retrieve all configured members of a pool.
+    pub fn get_pool_members(env: Env, pool_id: u64) -> Result<Vec<Member>, Error> {
+        get_pool_members(&env, pool_id)
+    }
 }
