@@ -323,3 +323,12 @@ fn test_create_payment_zero_or_negative_amount() {
     let res2 = fixture.client.try_create_payment(&100, &1, &payer, &-50);
     assert_eq!(res2, Err(Ok(Error::InvalidAmount)));
 }
+
+#[test]
+fn test_create_payment_nonexistent_pool() {
+    let fixture = TestFixture::setup();
+    let payer = Address::generate(&fixture.env);
+
+    let res = fixture.client.try_create_payment(&100, &999, &payer, &5000);
+    assert_eq!(res, Err(Ok(Error::PoolNotFound)));
+}
