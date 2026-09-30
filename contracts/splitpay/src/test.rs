@@ -142,3 +142,31 @@ fn test_set_pool_status() {
     fixture.client.set_pool_status(&1, &PoolStatus::Active);
     assert_eq!(fixture.client.get_pool(&1).status, PoolStatus::Active);
 }
+
+
+// ==========================================
+// 3. MEMBER MANAGEMENT TESTS
+// ==========================================
+
+#[test]
+fn test_add_member() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    assert_eq!(
+        fixture.client.try_add_member(&1, &member1, &5000),
+        Ok(Ok(()))
+    );
+
+    let member = fixture.client.get_member(&1, &member1);
+    assert_eq!(member.pool_id, 1);
+    assert_eq!(member.address, member1);
+    assert_eq!(member.share_bps, 5000);
+
+    let members = fixture.client.get_pool_members(&1);
+    assert_eq!(members.len(), 1);
+}
