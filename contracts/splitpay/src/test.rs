@@ -97,3 +97,17 @@ fn test_create_pool() {
     assert_eq!(pool.status, PoolStatus::Active);
     assert_eq!(pool.created_at, 1700000000);
 }
+
+#[test]
+fn test_duplicate_pool() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    let res = fixture
+        .client
+        .try_create_pool(&1, &owner, &fixture.asset_address);
+    assert_eq!(res, Err(Ok(Error::PoolAlreadyExists)));
+}
