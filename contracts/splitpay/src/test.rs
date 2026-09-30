@@ -45,3 +45,20 @@ impl<'a> TestFixture<'a> {
         }
     }
 }
+
+
+// ==========================================
+// 1. INITIALIZATION TESTS
+// ==========================================
+
+#[test]
+fn test_successful_initialization() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let contract_id = env.register(SplitPayContract, ());
+    let client = SplitPayContractClient::new(&env, &contract_id);
+
+    assert_eq!(client.try_initialize(&admin), Ok(Ok(())));
+}
