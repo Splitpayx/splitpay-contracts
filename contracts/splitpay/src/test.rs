@@ -257,3 +257,20 @@ fn test_invalid_shares() {
     let res2 = fixture.client.try_add_member(&1, &member1, &10001);
     assert_eq!(res2, Err(Ok(Error::InvalidShare)));
 }
+
+#[test]
+fn test_total_shares_above_10000_rejected() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+    let member2 = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member1, &6000);
+
+    // 6000 + 4001 = 10001 > 10000
+    let res = fixture.client.try_add_member(&1, &member2, &4001);
+    assert_eq!(res, Err(Ok(Error::InvalidTotalShares)));
+}
