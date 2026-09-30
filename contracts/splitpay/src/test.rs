@@ -491,3 +491,44 @@ fn test_settle_three_members_50_30_20() {
     assert_eq!(fixture.token_client.balance(&bob), 300);
     assert_eq!(fixture.token_client.balance(&charlie), 200);
 }
+
+#[test]
+fn test_settle_uneven_amounts_and_deterministic_remainder() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let alice = Address::generate(&fixture.env);
+    let bob = Address::generate(&fixture.env);
+    let charlie = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    // 33.34% + 33.33% + 33.33% = 100.00%
+    fixture.client.add_member(&1, &alice, &3334);
+    fixture.client.add_member(&1, &bob, &3333);
+    fixture.client.add_member(&1, &charlie, &3333);
+
+    // Pay 100 stroops:
+    // Alice base: 100 * 3334 / 10000 = 33
+    // Bob base: 100 * 3333 / 10000 = 33
+    // Charlie base: 100 * 3333 / 10000 = 33
+    // Allocated: 99
+    // Remainder: 1 -> deterministically assigned to first member (Alice)
+    // Alice total: 34
+    // Bob total: 33
+    // Charlie total: 33
+    // Sum = 34 + 33 + 33 = 100!
+    fixture.stellar_asset.mint(&payer, &100);
+    fixture.client.create_payment(&104, &1, &payer, &100);
+    fixture.client.settle_payment(&104);
+
+    let bal_alice = fixture.token_client.balance(&alice);
+    let bal_bob = fixture.token_client.balance(&bob);
+    let bal_charlie = fixture.token_client.balance(&charlie);
+
+    assert_eq!(bal_alice, 34);
+    assert_eq!(bal_bob, 33);
+    assert_eq!(bal_charlie, 33);
+    assert_eq!(bal_alice + bal_bob + bal_charlie, 100);
+}
