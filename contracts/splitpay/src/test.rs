@@ -304,3 +304,22 @@ fn test_create_valid_payment() {
     assert_eq!(payment.amount, 5000);
     assert_eq!(payment.status, PaymentStatus::Pending);
 }
+
+#[test]
+fn test_create_payment_zero_or_negative_amount() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member1, &10000);
+
+    let res = fixture.client.try_create_payment(&100, &1, &payer, &0);
+    assert_eq!(res, Err(Ok(Error::InvalidAmount)));
+
+    let res2 = fixture.client.try_create_payment(&100, &1, &payer, &-50);
+    assert_eq!(res2, Err(Ok(Error::InvalidAmount)));
+}
