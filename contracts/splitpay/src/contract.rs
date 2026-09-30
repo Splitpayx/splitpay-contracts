@@ -109,4 +109,69 @@ impl SplitPayContract {
         events::member_added(&env, pool_id, &address, share_bps);
         Ok(())
     }
+
+    /// Remove a member from the pool.
+    pub fn remove_member(env: Env, pool_id: u64, address: Address) -> Result<(), Error> {
+        if !has_config(&env) {
+            return Err(Error::NotInitialized);
+        }
+        let pool = get_pool(&env, pool_id)?;
+        pool.owner.require_auth();
+
+        if !has_member(&env, pool_id, &address) {
+            return Err(Error::MemberNotFound);
+        }
+
+        storage::remove_member(&env, pool_id, &address);
+        events::member_removed(&env, pool_id, &address);
+        Ok(())
+    }
+
+    /// Update a member's share basis points.
+    pub fn update_member_share(
+        env: Env,
+        pool_id: u64,
+        address: Address,
+        share_bps: u32,
+    ) -> Result<(), Error> {
+        if !has_config(&env) {
+            return Err(Error::NotInitialized);
+        }
+        let pool = get_pool(&env, pool_id)?;
+        pool.owner.require_auth();
+
+        if share_bps == 0 || share_bps > MAX_BPS {
+            return Err(Error::InvalidShare);
+        }
+
+        let old_member = storage::get_member(&env, pool_id, &address)?;
+
+        // Validate that total shares with the updated value do not exceed 10000
+        let members = get_pool_members(&env, pool_id)?;
+        let mut total_shares: u32 = 0;
+        for m in members.iter() {
+            total_shares = total_shares
+                .checked_add(m.share_bps)
+                .ok_or(Error::ArithmeticOverflow)?;
+        }
+        let base_shares = total_shares
+            .checked_sub(old_member.share_bps)
+            .ok_or(Error::ArithmeticOverflow)?;
+        if base_shares
+            .checked_add(share_bps)
+            .ok_or(Error::ArithmeticOverflow)?
+            > MAX_BPS
+        {
+            return Err(Error::InvalidTotalShares);
+        }
+
+        let updated = Member {
+            pool_id,
+            address: address.clone(),
+            share_bps,
+        };
+        set_member(&env, &updated);
+        events::share_updated(&env, pool_id, &address, old_member.share_bps, share_bps);
+        Ok(())
+    }
 }
