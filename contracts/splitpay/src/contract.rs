@@ -14,3 +14,17 @@ const MAX_BPS: u32 = 10_000;
 
 #[contract]
 pub struct SplitPayContract;
+
+#[contractimpl]
+impl SplitPayContract {
+    /// Initialize the contract with an administrator address.
+    pub fn initialize(env: Env, admin: Address) -> Result<(), Error> {
+        if has_config(&env) {
+            return Err(Error::AlreadyInitialized);
+        }
+        admin.require_auth();
+
+        set_config(&env, &ContractConfig { admin });
+        Ok(())
+    }
+}
