@@ -417,3 +417,30 @@ fn test_settle_one_member_100_percent() {
     assert_eq!(dist.amount, 5000);
     assert_eq!(dist.share_bps, 10000);
 }
+
+#[test]
+fn test_settle_two_members_50_50() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let alice = Address::generate(&fixture.env);
+    let bob = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &alice, &5000);
+    fixture.client.add_member(&1, &bob, &5000);
+
+    fixture.stellar_asset.mint(&payer, &2000);
+    fixture.client.create_payment(&101, &1, &payer, &2000);
+    fixture.client.settle_payment(&101);
+
+    assert_eq!(fixture.token_client.balance(&alice), 1000);
+    assert_eq!(fixture.token_client.balance(&bob), 1000);
+    assert_eq!(fixture.token_client.balance(&payer), 0);
+
+    let d_alice = fixture.client.get_distribution(&101, &alice);
+    let d_bob = fixture.client.get_distribution(&101, &bob);
+    assert_eq!(d_alice.amount + d_bob.amount, 2000);
+}
