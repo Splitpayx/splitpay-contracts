@@ -382,3 +382,38 @@ fn test_create_payment_shares_below_10000_rejected() {
     let res = fixture.client.try_create_payment(&100, &1, &payer, &5000);
     assert_eq!(res, Err(Ok(Error::InvalidTotalShares)));
 }
+
+
+// ==========================================
+// 5. PAYMENT SETTLEMENT TESTS
+// ==========================================
+
+#[test]
+fn test_settle_one_member_100_percent() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member1, &10000);
+
+    // Fund payer
+    fixture.stellar_asset.mint(&payer, &10000);
+    assert_eq!(fixture.token_client.balance(&payer), 10000);
+
+    fixture.client.create_payment(&100, &1, &payer, &5000);
+    assert_eq!(fixture.client.try_settle_payment(&100), Ok(Ok(())));
+
+    assert_eq!(fixture.token_client.balance(&payer), 5000);
+    assert_eq!(fixture.token_client.balance(&member1), 5000);
+
+    let payment = fixture.client.get_payment(&100);
+    assert_eq!(payment.status, PaymentStatus::Settled);
+
+    let dist = fixture.client.get_distribution(&100, &member1);
+    assert_eq!(dist.amount, 5000);
+    assert_eq!(dist.share_bps, 10000);
+}
