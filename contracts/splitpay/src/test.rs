@@ -332,3 +332,20 @@ fn test_create_payment_nonexistent_pool() {
     let res = fixture.client.try_create_payment(&100, &999, &payer, &5000);
     assert_eq!(res, Err(Ok(Error::PoolNotFound)));
 }
+
+#[test]
+fn test_create_payment_inactive_pool() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member1, &10000);
+    fixture.client.set_pool_status(&1, &PoolStatus::Inactive);
+
+    let res = fixture.client.try_create_payment(&100, &1, &payer, &5000);
+    assert_eq!(res, Err(Ok(Error::InvalidPoolStatus)));
+}
