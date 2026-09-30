@@ -71,3 +71,29 @@ fn test_duplicate_initialization() {
     let res = fixture.client.try_initialize(&another_admin);
     assert_eq!(res, Err(Ok(Error::AlreadyInitialized)));
 }
+
+
+// ==========================================
+// 2. POOL MANAGEMENT TESTS
+// ==========================================
+
+#[test]
+fn test_create_pool() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+
+    fixture.env.ledger().set_timestamp(1700000000);
+    assert_eq!(
+        fixture
+            .client
+            .try_create_pool(&1, &owner, &fixture.asset_address),
+        Ok(Ok(()))
+    );
+
+    let pool = fixture.client.get_pool(&1);
+    assert_eq!(pool.id, 1);
+    assert_eq!(pool.owner, owner);
+    assert_eq!(pool.asset, fixture.asset_address);
+    assert_eq!(pool.status, PoolStatus::Active);
+    assert_eq!(pool.created_at, 1700000000);
+}
