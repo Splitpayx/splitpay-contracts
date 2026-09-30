@@ -466,3 +466,28 @@ fn test_settle_multiple_members_60_40() {
     assert_eq!(fixture.token_client.balance(&alice), 6000);
     assert_eq!(fixture.token_client.balance(&bob), 4000);
 }
+
+#[test]
+fn test_settle_three_members_50_30_20() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let alice = Address::generate(&fixture.env);
+    let bob = Address::generate(&fixture.env);
+    let charlie = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &alice, &5000);
+    fixture.client.add_member(&1, &bob, &3000);
+    fixture.client.add_member(&1, &charlie, &2000);
+
+    fixture.stellar_asset.mint(&payer, &1000);
+    fixture.client.create_payment(&103, &1, &payer, &1000);
+    fixture.client.settle_payment(&103);
+
+    assert_eq!(fixture.token_client.balance(&alice), 500);
+    assert_eq!(fixture.token_client.balance(&bob), 300);
+    assert_eq!(fixture.token_client.balance(&charlie), 200);
+}
