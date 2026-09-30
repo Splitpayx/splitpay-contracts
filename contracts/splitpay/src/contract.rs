@@ -260,4 +260,137 @@ impl SplitPayContract {
         events::payment_created(&env, payment_id, pool_id, &payer, amount);
         Ok(())
     }
+
+    /// Settle a payment atomically: snapshots active split, transfers funds from payer,
+    /// distributes according to shares, and records permanent distribution records.
+    pub fn settle_payment(env: Env, payment_id: u64) -> Result<(), Error> {
+        if !has_config(&env) {
+            return Err(Error::NotInitialized);
+        }
+
+        let mut payment = get_payment(&env, payment_id)?;
+        if payment.status == PaymentStatus::Settled {
+            return Err(Error::PaymentAlreadySettled);
+        }
+
+        payment.payer.require_auth();
+
+        let pool = get_pool(&env, payment.pool_id)?;
+        if pool.status != PoolStatus::Active {
+            return Err(Error::InvalidPoolStatus);
+        }
+
+        // Snapshot current pool members and validate 10000 bps
+        let members = get_pool_members(&env, payment.pool_id)?;
+        if members.is_empty() {
+            return Err(Error::InvalidTotalShares);
+        }
+        let mut total_shares: u32 = 0;
+        for m in members.iter() {
+            total_shares = total_shares
+                .checked_add(m.share_bps)
+                .ok_or(Error::ArithmeticOverflow)?;
+        }
+        if total_shares != MAX_BPS {
+            return Err(Error::InvalidTotalShares);
+        }
+
+        // Calculate member allocations with deterministic remainder handling
+        let total_amount = payment.amount;
+        let mut allocated_sum: i128 = 0;
+        let mut allocations = Vec::new(&env);
+
+        for m in members.iter() {
+            let alloc = total_amount
+                .checked_mul(m.share_bps as i128)
+                .ok_or(Error::ArithmeticOverflow)?
+                .checked_div(BPS_DENOMINATOR)
+                .ok_or(Error::ArithmeticOverflow)?;
+            allocated_sum = allocated_sum
+                .checked_add(alloc)
+                .ok_or(Error::ArithmeticOverflow)?;
+            allocations.push_back(alloc);
+        }
+
+        // Remainder policy: assign remaining units deterministically to the first member (index 0)
+        let remainder = total_amount
+            .checked_sub(allocated_sum)
+            .ok_or(Error::ArithmeticOverflow)?;
+        if remainder > 0 && !allocations.is_empty() {
+            let first_alloc = allocations.get(0).unwrap();
+            let new_first = first_alloc
+                .checked_add(remainder)
+                .ok_or(Error::ArithmeticOverflow)?;
+            allocations.set(0, new_first);
+        }
+
+        // Token transfers
+        let token_client = token::Client::new(&env, &payment.asset);
+        let contract_address = env.current_contract_address();
+
+        // Step 1: Fund contract from payer
+        token_client.transfer(&payment.payer, &contract_address, &total_amount);
+
+        // Step 2: Distribute allocations to members and persist historical distributions
+        let mut recipients = Vec::new(&env);
+        for (i, m) in members.iter().enumerate() {
+            let alloc = allocations.get(i as u32).unwrap();
+            if alloc > 0 {
+                token_client.transfer(&contract_address, &m.address, &alloc);
+            }
+
+            let dist = Distribution {
+                payment_id,
+                recipient: m.address.clone(),
+                amount: alloc,
+                share_bps: m.share_bps,
+            };
+            storage::set_distribution(&env, &dist);
+            recipients.push_back(m.address.clone());
+            events::distribution_created(&env, payment_id, &m.address, alloc, m.share_bps);
+        }
+        storage::set_payment_recipients(&env, payment_id, &recipients);
+
+        // Update payment status to Settled
+        payment.status = PaymentStatus::Settled;
+        set_payment(&env, &payment);
+        events::payment_settled(
+            &env,
+            payment_id,
+            payment.pool_id,
+            &payment.payer,
+            total_amount,
+        );
+
+        Ok(())
+    }
+
+    /// Retrieve payment details.
+    pub fn get_payment(env: Env, payment_id: u64) -> Result<Payment, Error> {
+        get_payment(&env, payment_id)
+    }
+
+    /// Retrieve the historical distribution for a recipient in a payment.
+    pub fn get_distribution(
+        env: Env,
+        payment_id: u64,
+        recipient: Address,
+    ) -> Result<Distribution, Error> {
+        storage::get_distribution(&env, payment_id, &recipient)
+    }
+
+    /// Retrieve all distributions for a settled payment.
+    pub fn get_distributions(env: Env, payment_id: u64) -> Result<Vec<Distribution>, Error> {
+        if !has_payment(&env, payment_id) {
+            return Err(Error::PaymentNotFound);
+        }
+        let recipients = storage::get_payment_recipients(&env, payment_id);
+        let mut dists = Vec::new(&env);
+        for r in recipients.iter() {
+            if let Ok(d) = storage::get_distribution(&env, payment_id, &r) {
+                dists.push_back(d);
+            }
+        }
+        Ok(dists)
+    }
 }
