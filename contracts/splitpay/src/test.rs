@@ -125,3 +125,20 @@ fn test_pool_uninitialized() {
     let res = client.try_create_pool(&1, &owner, &asset);
     assert_eq!(res, Err(Ok(Error::NotInitialized)));
 }
+
+#[test]
+fn test_set_pool_status() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    assert_eq!(fixture.client.get_pool(&1).status, PoolStatus::Active);
+
+    fixture.client.set_pool_status(&1, &PoolStatus::Inactive);
+    assert_eq!(fixture.client.get_pool(&1).status, PoolStatus::Inactive);
+
+    fixture.client.set_pool_status(&1, &PoolStatus::Active);
+    assert_eq!(fixture.client.get_pool(&1).status, PoolStatus::Active);
+}
