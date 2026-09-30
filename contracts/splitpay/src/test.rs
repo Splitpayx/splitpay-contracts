@@ -170,3 +170,18 @@ fn test_add_member() {
     let members = fixture.client.get_pool_members(&1);
     assert_eq!(members.len(), 1);
 }
+
+#[test]
+fn test_duplicate_member() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member1, &5000);
+
+    let res = fixture.client.try_add_member(&1, &member1, &2000);
+    assert_eq!(res, Err(Ok(Error::MemberAlreadyExists)));
+}
