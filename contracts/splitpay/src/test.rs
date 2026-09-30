@@ -532,3 +532,24 @@ fn test_settle_uneven_amounts_and_deterministic_remainder() {
     assert_eq!(bal_charlie, 33);
     assert_eq!(bal_alice + bal_bob + bal_charlie, 100);
 }
+
+#[test]
+fn test_settle_duplicate_settlement_rejected() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member, &10000);
+
+    fixture.stellar_asset.mint(&payer, &2000);
+    fixture.client.create_payment(&105, &1, &payer, &1000);
+    fixture.client.settle_payment(&105);
+
+    // Attempt second settlement
+    let res = fixture.client.try_settle_payment(&105);
+    assert_eq!(res, Err(Ok(Error::PaymentAlreadySettled)));
+}
