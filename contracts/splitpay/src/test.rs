@@ -221,3 +221,20 @@ fn test_remove_nonexistent_member() {
     let res = fixture.client.try_remove_member(&1, &member1);
     assert_eq!(res, Err(Ok(Error::MemberNotFound)));
 }
+
+#[test]
+fn test_update_member_share() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+    let member2 = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &member1, &6000);
+    fixture.client.add_member(&1, &member2, &4000);
+
+    fixture.client.update_member_share(&1, &member1, &5000);
+    assert_eq!(fixture.client.get_member(&1, &member1).share_bps, 5000);
+}
