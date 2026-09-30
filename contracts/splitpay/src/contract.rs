@@ -203,4 +203,61 @@ impl SplitPayContract {
     pub fn get_pool_members(env: Env, pool_id: u64) -> Result<Vec<Member>, Error> {
         get_pool_members(&env, pool_id)
     }
+
+    /// Create a pending payment targeting a pool.
+    pub fn create_payment(
+        env: Env,
+        payment_id: u64,
+        pool_id: u64,
+        payer: Address,
+        amount: i128,
+    ) -> Result<(), Error> {
+        if !has_config(&env) {
+            return Err(Error::NotInitialized);
+        }
+        payer.require_auth();
+
+        if amount <= 0 {
+            return Err(Error::InvalidAmount);
+        }
+
+        if has_payment(&env, payment_id) {
+            return Err(Error::PaymentAlreadyExists);
+        }
+
+        let pool = get_pool(&env, pool_id)?;
+        if pool.status != PoolStatus::Active {
+            return Err(Error::InvalidPoolStatus);
+        }
+
+        // Validate that total shares equal exactly 10000 before accepting payment
+        let members = get_pool_members(&env, pool_id)?;
+        if members.is_empty() {
+            return Err(Error::InvalidTotalShares);
+        }
+        let mut total_shares: u32 = 0;
+        for m in members.iter() {
+            total_shares = total_shares
+                .checked_add(m.share_bps)
+                .ok_or(Error::ArithmeticOverflow)?;
+        }
+        if total_shares != MAX_BPS {
+            return Err(Error::InvalidTotalShares);
+        }
+
+        let created_at = env.ledger().timestamp();
+        let payment = Payment {
+            id: payment_id,
+            pool_id,
+            payer: payer.clone(),
+            asset: pool.asset.clone(),
+            amount,
+            status: PaymentStatus::Pending,
+            created_at,
+        };
+
+        set_payment(&env, &payment);
+        events::payment_created(&env, payment_id, pool_id, &payer, amount);
+        Ok(())
+    }
 }
