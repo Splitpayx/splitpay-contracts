@@ -111,3 +111,17 @@ fn test_duplicate_pool() {
         .try_create_pool(&1, &owner, &fixture.asset_address);
     assert_eq!(res, Err(Ok(Error::PoolAlreadyExists)));
 }
+
+#[test]
+fn test_pool_uninitialized() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let owner = Address::generate(&env);
+    let asset = Address::generate(&env);
+    let contract_id = env.register(SplitPayContract, ());
+    let client = SplitPayContractClient::new(&env, &contract_id);
+
+    let res = client.try_create_pool(&1, &owner, &asset);
+    assert_eq!(res, Err(Ok(Error::NotInitialized)));
+}
