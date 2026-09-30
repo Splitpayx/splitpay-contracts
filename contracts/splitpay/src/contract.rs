@@ -57,4 +57,56 @@ impl SplitPayContract {
         events::pool_created(&env, pool_id, &owner, &asset, created_at);
         Ok(())
     }
+
+    /// Add a member and their percentage share in basis points (10000 = 100%).
+    pub fn add_member(
+        env: Env,
+        pool_id: u64,
+        address: Address,
+        share_bps: u32,
+    ) -> Result<(), Error> {
+        if !has_config(&env) {
+            return Err(Error::NotInitialized);
+        }
+        let pool = get_pool(&env, pool_id)?;
+        pool.owner.require_auth();
+
+        if share_bps == 0 || share_bps > MAX_BPS {
+            return Err(Error::InvalidShare);
+        }
+
+        if has_member(&env, pool_id, &address) {
+            return Err(Error::MemberAlreadyExists);
+        }
+
+        // Validate that total shares do not exceed 10000
+        let members = get_pool_members(&env, pool_id)?;
+        let mut total_shares: u32 = 0;
+        for m in members.iter() {
+            total_shares = total_shares
+                .checked_add(m.share_bps)
+                .ok_or(Error::ArithmeticOverflow)?;
+        }
+        if total_shares
+            .checked_add(share_bps)
+            .ok_or(Error::ArithmeticOverflow)?
+            > MAX_BPS
+        {
+            return Err(Error::InvalidTotalShares);
+        }
+
+        let member = Member {
+            pool_id,
+            address: address.clone(),
+            share_bps,
+        };
+        set_member(&env, &member);
+
+        let mut addrs = storage::get_pool_member_addresses(&env, pool_id);
+        addrs.push_back(address.clone());
+        storage::set_pool_member_addresses(&env, pool_id, &addrs);
+
+        events::member_added(&env, pool_id, &address, share_bps);
+        Ok(())
+    }
 }
