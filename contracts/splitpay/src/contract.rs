@@ -27,4 +27,34 @@ impl SplitPayContract {
         set_config(&env, &ContractConfig { admin });
         Ok(())
     }
+
+    /// Create a new pool with the specified owner and payment asset.
+    pub fn create_pool(
+        env: Env,
+        pool_id: u64,
+        owner: Address,
+        asset: Address,
+    ) -> Result<(), Error> {
+        if !has_config(&env) {
+            return Err(Error::NotInitialized);
+        }
+        owner.require_auth();
+
+        if has_pool(&env, pool_id) {
+            return Err(Error::PoolAlreadyExists);
+        }
+
+        let created_at = env.ledger().timestamp();
+        let pool = Pool {
+            id: pool_id,
+            owner: owner.clone(),
+            asset: asset.clone(),
+            status: PoolStatus::Active,
+            created_at,
+        };
+
+        set_pool(&env, &pool);
+        events::pool_created(&env, pool_id, &owner, &asset, created_at);
+        Ok(())
+    }
 }
