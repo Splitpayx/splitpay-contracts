@@ -208,3 +208,16 @@ fn test_remove_member() {
         Err(Ok(Error::MemberNotFound))
     );
 }
+
+#[test]
+fn test_remove_nonexistent_member() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let member1 = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    let res = fixture.client.try_remove_member(&1, &member1);
+    assert_eq!(res, Err(Ok(Error::MemberNotFound)));
+}
