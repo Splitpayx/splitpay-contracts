@@ -606,3 +606,54 @@ fn test_historical_distributions_remain_unchanged() {
     assert_eq!(p2_alice.amount, 700);
     assert_eq!(p2_bob.amount, 300);
 }
+
+
+// ==========================================
+// 6. FINANCIAL INVARIANTS COMPREHENSIVE TESTS
+// ==========================================
+
+#[test]
+fn test_financial_invariants_across_arbitrary_amounts() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let m1 = Address::generate(&fixture.env);
+    let m2 = Address::generate(&fixture.env);
+    let m3 = Address::generate(&fixture.env);
+    let m4 = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    // Arbitrary uneven percentages: 35.12% + 24.88% + 20.00% + 20.00% = 100.00%
+    fixture.client.add_member(&1, &m1, &3512);
+    fixture.client.add_member(&1, &m2, &2488);
+    fixture.client.add_member(&1, &m3, &2000);
+    fixture.client.add_member(&1, &m4, &2000);
+
+    // Assert Split invariant: sum(member shares) == 10000
+    let members = fixture.client.get_pool_members(&1);
+    let total_shares: u32 = members.iter().map(|m| m.share_bps).sum();
+    assert_eq!(total_shares, 10000);
+
+    let test_amounts: [i128; 8] = [1, 3, 7, 99, 100, 1000, 9999, 1234567];
+
+    for (idx, &amount) in test_amounts.iter().enumerate() {
+        let payment_id = 1000 + idx as u64;
+        fixture.stellar_asset.mint(&payer, &amount);
+        fixture
+            .client
+            .create_payment(&payment_id, &1, &payer, &amount);
+        fixture.client.settle_payment(&payment_id);
+
+        let dists = fixture.client.get_distributions(&payment_id);
+        let dist_sum: i128 = dists.iter().map(|d| d.amount).sum();
+
+        // STRICT FINANCIAL INVARIANT: sum(all distributions) == original payment amount
+        assert_eq!(
+            dist_sum, amount,
+            "Distribution sum must match original payment amount for amount {}",
+            amount
+        );
+    }
+}
