@@ -46,7 +46,6 @@ impl<'a> TestFixture<'a> {
     }
 }
 
-
 // ==========================================
 // 1. INITIALIZATION TESTS
 // ==========================================
@@ -71,7 +70,6 @@ fn test_duplicate_initialization() {
     let res = fixture.client.try_initialize(&another_admin);
     assert_eq!(res, Err(Ok(Error::AlreadyInitialized)));
 }
-
 
 // ==========================================
 // 2. POOL MANAGEMENT TESTS
@@ -142,7 +140,6 @@ fn test_set_pool_status() {
     fixture.client.set_pool_status(&1, &PoolStatus::Active);
     assert_eq!(fixture.client.get_pool(&1).status, PoolStatus::Active);
 }
-
 
 // ==========================================
 // 3. MEMBER MANAGEMENT TESTS
@@ -275,7 +272,6 @@ fn test_total_shares_above_10000_rejected() {
     assert_eq!(res, Err(Ok(Error::InvalidTotalShares)));
 }
 
-
 // ==========================================
 // 4. PAYMENT CREATION TESTS
 // ==========================================
@@ -382,7 +378,6 @@ fn test_create_payment_shares_below_10000_rejected() {
     let res = fixture.client.try_create_payment(&100, &1, &payer, &5000);
     assert_eq!(res, Err(Ok(Error::InvalidTotalShares)));
 }
-
 
 // ==========================================
 // 5. PAYMENT SETTLEMENT TESTS
@@ -606,7 +601,6 @@ fn test_historical_distributions_remain_unchanged() {
     assert_eq!(p2_alice.amount, 700);
     assert_eq!(p2_bob.amount, 300);
 }
-
 
 // ==========================================
 // 6. FINANCIAL INVARIANTS COMPREHENSIVE TESTS
