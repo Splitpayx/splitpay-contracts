@@ -553,3 +553,56 @@ fn test_settle_duplicate_settlement_rejected() {
     let res = fixture.client.try_settle_payment(&105);
     assert_eq!(res, Err(Ok(Error::PaymentAlreadySettled)));
 }
+
+#[test]
+fn test_historical_distributions_remain_unchanged() {
+    let fixture = TestFixture::setup();
+    let owner = Address::generate(&fixture.env);
+    let alice = Address::generate(&fixture.env);
+    let bob = Address::generate(&fixture.env);
+    let payer = Address::generate(&fixture.env);
+
+    // Initial split: Alice 60%, Bob 40%
+    fixture
+        .client
+        .create_pool(&1, &owner, &fixture.asset_address);
+    fixture.client.add_member(&1, &alice, &6000);
+    fixture.client.add_member(&1, &bob, &4000);
+
+    fixture.stellar_asset.mint(&payer, &2000);
+
+    // Settle Payment #1 (1000 stroops)
+    fixture.client.create_payment(&1, &1, &payer, &1000);
+    fixture.client.settle_payment(&1);
+
+    assert_eq!(fixture.token_client.balance(&alice), 600);
+    assert_eq!(fixture.token_client.balance(&bob), 400);
+
+    let p1_alice = fixture.client.get_distribution(&1, &alice);
+    let p1_bob = fixture.client.get_distribution(&1, &bob);
+    assert_eq!(p1_alice.amount, 600);
+    assert_eq!(p1_bob.amount, 400);
+
+    // Owner reconfigures split: update Bob first to 30% so total does not exceed 10000, then Alice to 70%
+    fixture.client.update_member_share(&1, &bob, &3000);
+    fixture.client.update_member_share(&1, &alice, &7000);
+
+    // Settle Payment #2 (1000 stroops)
+    fixture.client.create_payment(&2, &1, &payer, &1000);
+    fixture.client.settle_payment(&2);
+
+    assert_eq!(fixture.token_client.balance(&alice), 600 + 700);
+    assert_eq!(fixture.token_client.balance(&bob), 400 + 300);
+
+    // CRITICAL PROTOCOL INVARIANT: Historical payment #1 distribution is COMPLETELY UNCHANGED
+    let p1_alice_after = fixture.client.get_distribution(&1, &alice);
+    let p1_bob_after = fixture.client.get_distribution(&1, &bob);
+    assert_eq!(p1_alice_after.amount, 600);
+    assert_eq!(p1_bob_after.amount, 400);
+
+    // Payment #2 distribution matches new split
+    let p2_alice = fixture.client.get_distribution(&2, &alice);
+    let p2_bob = fixture.client.get_distribution(&2, &bob);
+    assert_eq!(p2_alice.amount, 700);
+    assert_eq!(p2_bob.amount, 300);
+}
