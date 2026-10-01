@@ -158,3 +158,43 @@ stellar network add \
 
 # Generate or import deployer identity
 stellar keys generate deployer --network testnet
+
+# Fund the deployer address via Friendbot
+stellar keys fund deployer --network testnet
+```
+
+### 2. Deploy Contract to Testnet
+
+```bash
+# Deploy WASM bytecode
+CONTRACT_ID=$(stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/splitpay.wasm \
+  --source deployer \
+  --network testnet)
+
+echo "SplitPay Contract ID: $CONTRACT_ID"
+```
+
+### 3. Initialize Contract
+
+```bash
+DEPLOYER_ADDRESS=$(stellar keys address deployer)
+
+stellar contract invoke \
+  --id "$CONTRACT_ID" \
+  --source deployer \
+  --network testnet \
+  -- \
+  initialize \
+  --admin "$DEPLOYER_ADDRESS"
+```
+
+### 4. Create and Configure a Pool
+
+```bash
+# Example: Create pool with Native XLM SAC (CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC on Testnet)
+ASSET_ADDRESS="CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
+
+# 1. Create Pool #1
+stellar contract invoke \
+  --id "$CONTRACT_ID" \
