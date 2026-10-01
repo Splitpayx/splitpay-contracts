@@ -118,3 +118,43 @@ cargo test
 ```
 
 ### Running Formatter & Linter
+
+```bash
+cargo fmt --all --check
+```
+
+---
+
+## Building the Contract
+
+Compile the release WASM bytecode:
+
+```bash
+# Using cargo rustc
+cargo rustc --manifest-path contracts/splitpay/Cargo.toml --target wasm32-unknown-unknown --release --crate-type cdylib
+
+# Or via Makefile
+make build
+
+# Or via script
+bash scripts/build.sh
+```
+
+The optimized WASM artifact will be generated at:
+`target/wasm32-unknown-unknown/release/splitpay.wasm`
+
+---
+
+## Testnet Deployment Workflow
+
+### 1. Configure Stellar CLI Identity & Network
+
+```bash
+# Configure Testnet network
+stellar network add \
+  --global testnet \
+  --rpc-url https://soroban-testnet.stellar.org:443 \
+  --network-passphrase "Test SDF Network ; September 2015"
+
+# Generate or import deployer identity
+stellar keys generate deployer --network testnet
