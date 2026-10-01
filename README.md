@@ -198,3 +198,51 @@ ASSET_ADDRESS="CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC"
 # 1. Create Pool #1
 stellar contract invoke \
   --id "$CONTRACT_ID" \
+  --source deployer \
+  --network testnet \
+  -- \
+  create_pool \
+  --pool_id 1 \
+  --owner "$DEPLOYER_ADDRESS" \
+  --asset "$ASSET_ADDRESS"
+
+# 2. Add Members (Shares must sum to 10,000 BPS / 100%)
+stellar contract invoke \
+  --id "$CONTRACT_ID" \
+  --source deployer \
+  --network testnet \
+  -- \
+  add_member \
+  --pool_id 1 \
+  --address "<MEMBER_1_ADDRESS>" \
+  --share_bps 6000
+
+stellar contract invoke \
+  --id "$CONTRACT_ID" \
+  --source deployer \
+  --network testnet \
+  -- \
+  add_member \
+  --pool_id 1 \
+  --address "<MEMBER_2_ADDRESS>" \
+  --share_bps 4000
+```
+
+### 5. Automated Deployment Script
+
+An automated end-to-end Testnet deployment script is provided:
+
+```bash
+export STELLAR_ACCOUNT=deployer
+bash scripts/deploy-testnet.sh
+```
+
+---
+
+## Financial Invariants Guaranteed
+
+The contract code and test suite formally guarantee:
+1. **$\sum \text{Member Shares} == 10,000$**: Pools cannot accept or settle payments unless the total configured share equals exactly 10,000 BPS (100.00%).
+2. **$\sum \text{Distributions} == \text{Payment Amount}$**: Every stroop / unit of asset is accounted for without truncation loss.
+3. **No Double Settlement**: Settled payments are finalized and cannot be settled more than once.
+4. **Historical Immutability**: Modifying pool members after settlement has zero effect on already settled distributions.
