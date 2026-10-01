@@ -68,3 +68,53 @@ SplitPay enables pool owners to define members and percentage shares in basis po
 | Entity | Fields | Storage Type | Description |
 | :--- | :--- | :--- | :--- |
 | **ContractConfig** | `admin` | Instance Storage | Contract administrator |
+| **Pool** | `id`, `owner`, `asset`, `status`, `created_at` | Persistent Storage | Payment pool configuration |
+| **Member** | `pool_id`, `address`, `share_bps` | Persistent Storage | Pool member with basis point allocation |
+| **Payment** | `id`, `pool_id`, `payer`, `asset`, `amount`, `status`, `created_at` | Persistent Storage | Payment record |
+| **Distribution** | `payment_id`, `recipient`, `amount`, `share_bps` | Persistent Storage | Individual recipient disbursement record |
+
+---
+
+## Contract Interface (Public Methods)
+
+### Administrative & Pool Management
+- `initialize(admin: Address)`: Initialize contract administrator.
+- `create_pool(pool_id: u64, owner: Address, asset: Address)`: Create a new pool.
+- `set_pool_status(pool_id: u64, status: PoolStatus)`: Activate or deactivate a pool.
+- `get_pool(pool_id: u64) -> Pool`: Query pool information.
+
+### Member Management
+- `add_member(pool_id: u64, address: Address, share_bps: u32)`: Add a member with specified basis points.
+- `remove_member(pool_id: u64, address: Address)`: Remove a member from the pool.
+- `update_member_share(pool_id: u64, address: Address, new_share_bps: u32)`: Update an existing member's share.
+- `get_member(pool_id: u64, address: Address) -> Member`: Query a specific pool member.
+- `get_pool_members(pool_id: u64) -> Vec<Member>`: List all members configured for a pool.
+
+### Payment & Settlement
+- `create_payment(payment_id: u64, pool_id: u64, payer: Address, amount: i128)`: Create an unsettled payment.
+- `settle_payment(payment_id: u64)`: Atomically fund and disburse payment across members.
+- `get_payment(payment_id: u64) -> Payment`: Query payment status and details.
+- `get_distribution(payment_id: u64, recipient: Address) -> Distribution`: Query a recipient's distribution.
+- `get_distributions(payment_id: u64) -> Vec<Distribution>`: Query all distributions for a payment.
+
+---
+
+## Prerequisites
+
+- **Rust**: `1.80+` (or toolchain with `wasm32-unknown-unknown` target installed)
+- **Target**: `rustup target add wasm32-unknown-unknown`
+- **Stellar CLI**: `v22+` (`cargo install --locked stellar-cli --features opt`)
+
+---
+
+## Local Development & Testing
+
+### Running Tests
+
+Run the full automated test suite containing 27 unit, integration, and invariant tests:
+
+```bash
+cargo test
+```
+
+### Running Formatter & Linter
